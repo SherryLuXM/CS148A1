@@ -27,37 +27,32 @@ from distance_map import DistanceMap
 class Parcel:
     """Create a parcel. Each parcel has a unique ID, volume (measured
     in cc), and a source and destination.
-
     === Public Attributes ===
-
     _id: a parcel's unique ID
     volume: how much space a parcel takes up in cubic centimetres
     source: name of the city it came from
     destination: name of the city its being delivered to
-
     === Representation Invariants ===
     - the volume can't be negative.
-
     === Sample Usage ===
-
     >>> p = Parcel(1, 10, 'Toronto', 'Calgary')
-    >>> p._id == 1
+    >>> p.id == 1
     True
     >>> p.source == 'Toronto'
     True
     >>> p.destination == 'Calgary'
     True
     """
-    _id: int
+    id: int
     volume: int
     source: str
     destination: str
 
-    def __init__(self, _id: int, volume: int, source: str, destination: str) \
+    def __init__(self, id: int, volume: int, source: str, destination: str) \
             -> None:
         """Create an instance of a parcel."""
 
-        self._id = _id
+        self.id = id
         self.volume = volume
         self.source = source
         self.destination = destination
@@ -66,9 +61,8 @@ class Parcel:
 class Truck:
     """Create an instance of a truck. Each truck has a unique ID,
     volume capacity, and a Route.
-
     === Public Attributes ===
-    _id: a truck's ID number
+    id: a truck's ID number
     volume_capacity: the maximum amount of volume a truck can
         carry.
     depot: a Truck's initial position.
@@ -76,14 +70,12 @@ class Truck:
         all trucks are initially empty.
     route: an ordered List of city names that a truck is supposed to
         go through. All trucks will initially have the depot on their
-        route.
-
+        routes
     === Representation Invariants ===
     - stored <= volume_capacity
-
     === Sample Usage ===
     >>> t = Truck(1200, 10, 'Toronto')
-    >>> t._id == 1200
+    >>> t.id == 1200
     True
     >>> t.volume_capacity == 10
     True
@@ -94,44 +86,49 @@ class Truck:
     >>> t.pack(p2)
     True
     >>> t.fullness()
-    50
+    50.0
     """
-    _id: int
+    id: int
     volume_capacity: int
     depot: str
     stored: int
     route: List[str]
+    parcels: List[Parcel]
 
-    def __init__(self, _id: int, volume_capacity: int, depot: str) -> None:
+    def __init__(self, id: int, volume_capacity: int, depot: str) -> None:
         """Create a Truck. A Truck will always initially be empty and will
         always start at the depot."""
 
-        self._id = _id
+        self.id = id
         self.volume_capacity = volume_capacity
         self.depot = depot
         self.stored = 0
         self.route = [self.depot]
+        self.parcels = []
 
     def pack(self, parcel: Parcel) -> bool:
         """Pack the Truck with a Parcel, return True if it has been
-        successfully packed. Return False if stored exceeds 
+        successfully packed. Return False if stored exceeds
         volume_capacity. Add the parcel's destination to the end
         of the Truck's route unless the LAST item is equal to the
         destination.
         >>> t = Truck(1000, 10, 'Toronto')
         >>> p1 = Parcel(1, 5, 'Toronto', 'Ottawa')
-        >>> p2 = Parcel(1, 6, 'Toronto', 'Calgary')
+        >>> p2 = Parcel(2, 6, 'Toronto', 'Calgary')
         >>> t.pack(p1)
         True
         >>> t.pack(p2)
         False
         >>> t.route[-1]
         'Ottawa'
+        >>> t.parcels
+        [1]
         """
         # First, check if there's enough space to fit the parcel.
         if parcel.volume + self.stored <= self.volume_capacity:
             # Add the parcel to the Truck.
             self.stored += parcel.volume
+            self.parcels.append(parcel)
             # Don't modify route if the last item is the same as the
             # parcel's destination.
             if self.route[-1] != parcel.destination:
@@ -151,7 +148,7 @@ class Truck:
         >>> t.pack(p2)
         True
         >>> t.fullness()
-        100
+        100.0
         """
         return (100 * self.stored) / self.volume_capacity
 
@@ -172,11 +169,15 @@ class Fleet:
         >>> f.num_trucks()
         0
         """
-        # TODO: Complete this method.
-        pass
+        self.trucks = []
 
     def add_truck(self, truck: Truck) -> None:
         """Add <truck> to this fleet.
+        algorithm: either ‘random’ or ‘greedy’.
+        truck_order: either ‘non-decreasing’ (meaning we choose the eligible truck with the least available space, and
+        as go through the parcels we choose trucks with greater available space), or ‘non-increasing’ (meaning we choose
+        the eligible truck with the most available space, and as we go through the parcels we will choose trucks with
+        less available space).
 
         Precondition: No truck with the same ID as <truck> has already been
         added to this Fleet.
@@ -187,16 +188,19 @@ class Fleet:
         >>> f.num_trucks()
         1
         """
-        # TODO: Complete this method.
-        pass
+        self.trucks.append(truck)
 
     # We will not test the format of the string that you return -- it is up
     # to you.
     def __str__(self) -> str:
         """Produce a string representation of this fleet
         """
-        # TODO: Complete this method.
-        pass
+        info = 'Information of all trucks in the fleet:'
+        for truck in self.trucks:
+            info = info + '\n' + f'ID: {Truck.id}; Depot: {truck.depot}; Storage: {truck.stored}/' \
+                                 f'{truck.volume_capacity}; Route: {truck.route}'
+        info += f'\nTotal: {self.num_trucks()} trucks'
+        return info
 
     def num_trucks(self) -> int:
         """Return the number of trucks in this fleet.
@@ -207,8 +211,7 @@ class Fleet:
         >>> f.num_trucks()
         1
         """
-        # TODO: Complete this method.
-        pass
+        return len(self.trucks)
 
     def num_nonempty_trucks(self) -> int:
         """Return the number of non-empty trucks in this fleet.
@@ -236,8 +239,11 @@ class Fleet:
         >>> f.num_nonempty_trucks()
         2
         """
-        # TODO: Complete this method.
-        pass
+        count = 0
+        for truck in self.trucks:
+            if truck.stored != 0:
+                count += 1
+        return count
 
     def parcel_allocations(self) -> Dict[int, List[int]]:
         """Return a dictionary in which each key is the ID of a truck in this
@@ -261,8 +267,12 @@ class Fleet:
         >>> f.parcel_allocations() == {1423: [27, 12], 1333: [28]}
         True
         """
-        # TODO: Complete this method.
-        pass
+        allocations = {}
+        for truck in self.trucks:
+            allocations[truck] = []
+            for parcel in truck.parcels:
+                allocations[truck].append(parcel.id)
+        return allocations
 
     def total_unused_space(self) -> int:
         """Return the total unused space, summed over all non-empty trucks in
