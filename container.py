@@ -97,7 +97,7 @@ class PriorityQueue(Container):
         self._queue = []
         self._higher_priority = higher_priority
 
-    def add(self, item: Any) -> None:
+        def add(self, item: Any) -> None:
         """Add <item> to this PriorityQueue.
 
         >>> # Define a PriorityQueue with priority on shorter strings.
@@ -116,8 +116,16 @@ class PriorityQueue(Container):
         >>> pq._queue
         ['monalisa', 'arju', 'fred']
         """
-        # TODO: Implement this method!
-        pass
+        for idx in range(len(self._queue)):
+            if not self._higher_priority(item, self._queue[idx]):
+                self._queue.insert(idx, item)
+                return None
+                # when <item> has lower priority than the loop object, <item> is inserted before the loop object
+                # when there is a tie, <self._higher_priority()> will return False, and <item> should be stored
+                # before the loop object, since the loop object is added first
+                # when we have successfully added <item> to self._queue,  the loop can end
+        # this is when <item> is the highest priority compared to every object in self._queue
+        self._queue.append(item)
 
     def remove(self) -> Any:
         """Remove and return the next item from this PriorityQueue.
