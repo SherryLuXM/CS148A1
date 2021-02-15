@@ -25,15 +25,135 @@ from distance_map import DistanceMap
 
 
 class Parcel:
-    # TODO: Implement this class!
-    # It must be consistent with the Fleet class docstring examples below.
-    pass
+    """Create a parcel. Each parcel has a unique ID, volume (measured
+    in cc), and a source and destination.
+
+    === Public Attributes ===
+
+    _id: a parcel's unique ID
+    volume: how much space a parcel takes up in cubic centimetres
+    source: name of the city it came from
+    destination: name of the city its being delivered to
+
+    === Representation Invariants ===
+    - the volume can't be negative.
+
+    === Sample Usage ===
+
+    >>> p = Parcel(1, 10, 'Toronto', 'Calgary')
+    >>> p._id == 1
+    True
+    >>> p.source == 'Toronto'
+    True
+    >>> p.destination == 'Calgary'
+    True
+    """
+    _id: int
+    volume: int
+    source: str
+    destination: str
+
+    def __init__(self, _id: int, volume: int, source: str, destination: str) \
+            -> None:
+        """Create an instance of a parcel."""
+
+        self._id = _id
+        self.volume = volume
+        self.source = source
+        self.destination = destination
 
 
 class Truck:
-    # TODO: Implement this class!
-    # It must be consistent with the Fleet class docstring examples below.
-    pass
+    """Create an instance of a truck. Each truck has a unique ID,
+    volume capacity, and a Route.
+
+    === Public Attributes ===
+    _id: a truck's ID number
+    volume_capacity: the maximum amount of volume a truck can
+        carry.
+    depot: a Truck's initial position.
+    stored: how much volume is stored onto the Truck,
+        all trucks are initially empty.
+    route: an ordered List of city names that a truck is supposed to
+        go through. All trucks will initially have the depot on their
+        route.
+
+    === Representation Invariants ===
+    - stored <= volume_capacity
+
+    === Sample Usage ===
+    >>> t = Truck(1200, 10, 'Toronto')
+    >>> t._id == 1200
+    True
+    >>> t.volume_capacity == 10
+    True
+    >>> p1 = Parcel(1, 2, 'Toronto', 'Ottawa')
+    >>> p2 = Parcel(2, 3, 'Toronto', 'Ottawa')
+    >>> t.pack(p1)
+    True
+    >>> t.pack(p2)
+    True
+    >>> t.fullness()
+    50
+    """
+    _id: int
+    volume_capacity: int
+    depot: str
+    stored: int
+    route: List[str]
+
+    def __init__(self, _id: int, volume_capacity: int, depot: str) -> None:
+        """Create a Truck. A Truck will always initially be empty and will
+        always start at the depot."""
+
+        self._id = _id
+        self.volume_capacity = volume_capacity
+        self.depot = depot
+        self.stored = 0
+        self.route = [self.depot]
+
+    def pack(self, parcel: Parcel) -> bool:
+        """Pack the Truck with a Parcel, return True if it has been
+        successfully packed. Return False if stored exceeds 
+        volume_capacity. Add the parcel's destination to the end
+        of the Truck's route unless the LAST item is equal to the
+        destination.
+        >>> t = Truck(1000, 10, 'Toronto')
+        >>> p1 = Parcel(1, 5, 'Toronto', 'Ottawa')
+        >>> p2 = Parcel(1, 6, 'Toronto', 'Calgary')
+        >>> t.pack(p1)
+        True
+        >>> t.pack(p2)
+        False
+        >>> t.route[-1]
+        'Ottawa'
+        """
+        # First, check if there's enough space to fit the parcel.
+        if parcel.volume + self.stored <= self.volume_capacity:
+            # Add the parcel to the Truck.
+            self.stored += parcel.volume
+            # Don't modify route if the last item is the same as the
+            # parcel's destination.
+            if self.route[-1] != parcel.destination:
+                self.route.append(parcel.destination)
+            return True
+        # At this point we know the parcel doesn't fit.
+        else:
+            return False
+
+    def fullness(self) -> float:
+        """Return the percentage of a Truck's fullness.
+        >>> t = Truck(1000, 10, 'Toronto')
+        >>> p1 = Parcel(1, 5, 'Toronto', 'Ottawa')
+        >>> p2 = Parcel(1, 5, 'Toronto', 'Calgary')
+        >>> t.pack(p1)
+        True
+        >>> t.pack(p2)
+        True
+        >>> t.fullness()
+        100
+        """
+        return (100 * self.stored) / self.volume_capacity
 
 
 class Fleet:
