@@ -63,9 +63,36 @@ class RandomScheduler(Scheduler):
     each time you run your random algorithm on a given problem, it may generate a different solution.
     """
 
-    def schedule(self, parcels: List[Parcel], trucks: List[Truck], verbose: bool = False) -> List[Parcel]:
-        """Schedule the given <parcels> onto the given <trucks> randomly"""
+    def __init__(self) -> None:
+        """initialize RandomScheduler"""
         pass
+
+    def schedule(self, parcels: List[Parcel], trucks: List[Truck], verbose: bool = False) -> List[Parcel]:
+        """Schedule the given <parcels> onto the given <trucks> randomly
+
+        >>> t1 = Truck(11, 10, 'Toronto')
+        >>> t2 = Truck(12, 10, 'Toronto')
+        >>> t3 = Truck(13, 10, 'Toronto')
+        >>> p1 = Parcel(1, 5, 'Toronto', 'Ottawa')
+        >>> p2 = Parcel(2, 15, 'Toronto', 'Calgary')
+        >>> random_scheduling = RandomScheduler()
+        >>> random_scheduling.schedule([p1, p2],[t1, t2, t3]) == [p2]
+        True
+        """
+        unpacked = []
+        shuffle(parcels) # ensure the for loop will go through parcels in random order
+        for parcel in parcels:
+            # generate a list of possible trucks;
+            packable = []
+            for truck in trucks:
+                if truck.packable(parcel):
+                    packable.append(truck)
+            if packable == []: # if no trucks available for this parcel, record parcel to <unpacked>
+                unpacked.append(parcel)
+            else:
+                truck_select = choice(trucks)#truck is randomly chosen
+                truck_select.pack(parcel)
+        return unpacked
 
 
 class GreedyScheduler(Scheduler):
