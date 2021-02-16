@@ -106,6 +106,29 @@ class Truck:
         self.route = [self.depot]
         self.parcels = []
 
+    def packable(self, parcel: Parcel) -> bool:
+        """
+        return True if it is possible to pack <parcel> onto the truck.
+        >>> t = Truck(1000, 10, 'Toronto')
+        >>> p1 = Parcel(1, 5, 'Toronto', 'Ottawa')
+        >>> p2 = Parcel(2, 6, 'Toronto', 'Calgary')
+        >>> t.packable(p1)
+        True
+        >>> t.packable(p2)
+        True
+        >>> t.pack(p1)
+        True
+        >>> t.packable(p2)
+        False
+        >>> t.pack(p2)
+        False
+        >>> t.route[-1]
+        'Ottawa'
+        >>> t.fullness()
+        50.0
+        """
+        return parcel.volume + self.stored <= self.volume_capacity
+
     def pack(self, parcel: Parcel) -> bool:
         """Pack the Truck with a Parcel, return True if it has been
         successfully packed. Return False if stored exceeds
@@ -121,11 +144,11 @@ class Truck:
         False
         >>> t.route[-1]
         'Ottawa'
-        >>> t.parcels
-        [1]
+        >>> t.fullness()
+        50.0
         """
         # First, check if there's enough space to fit the parcel.
-        if parcel.volume + self.stored <= self.volume_capacity:
+        if self.packable(parcel):
             # Add the parcel to the Truck.
             self.stored += parcel.volume
             self.parcels.append(parcel)
