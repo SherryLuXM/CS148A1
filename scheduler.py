@@ -21,7 +21,7 @@ This module contains the abstract Scheduler class, as well as the two
 subclasses RandomScheduler and GreedyScheduler, which implement the two
 scheduling algorithms described in the handout.
 """
-from typing import List, Dict, Union, Callable
+from typing import List, Dict, Union
 from random import shuffle, choice
 from container import PriorityQueue
 from domain import Parcel, Truck
@@ -56,20 +56,22 @@ class Scheduler:
         """
         raise NotImplementedError
 
+
 class RandomScheduler(Scheduler):
     """
-    The random algorithm will go through the parcels in random order. For each parcel, it will schedule it onto a
-    randomly chosen truck (from among those trucks that have capacity to add that parcel). Because of this randomness,
-    each time you run your random algorithm on a given problem, it may generate a different solution.
+    The random algorithm will go through the parcels in random order. For each
+    parcel, it will schedule it onto a randomly chosen truck (from among those
+    trucks that have capacity to add that parcel). Because of this randomness,
+    each time you run your random algorithm on a given problem, it may generate
+    a different solution.
     """
 
     def __init__(self) -> None:
         """initialize RandomScheduler"""
-        pass
 
-    def schedule(self, parcels: List[Parcel], trucks: List[Truck], verbose: bool = False) -> List[Parcel]:
+    def schedule(self, parcels: List[Parcel], trucks: List[Truck],
+                 verbose: bool = False) -> List[Parcel]:
         """Schedule the given <parcels> onto the given <trucks> randomly
-
         >>> t1 = Truck(11, 10, 'Toronto')
         >>> t2 = Truck(12, 10, 'Toronto')
         >>> t3 = Truck(13, 10, 'Toronto')
@@ -80,17 +82,19 @@ class RandomScheduler(Scheduler):
         True
         """
         unpacked = []
-        shuffle(parcels) # ensure the for loop will go through parcels in random order
+        shuffle(parcels)  # ensure the for loop will go through
+        # parcels in random order
         for parcel in parcels:
             # generate a list of possible trucks;
             packable = []
             for truck in trucks:
                 if truck.packable(parcel):
                     packable.append(truck)
-            if packable == []: # if no trucks available for this parcel, record parcel to <unpacked>
+            if not packable:  # if no trucks available for this
+                # parcel, record parcel to <unpacked>
                 unpacked.append(parcel)
             else:
-                truck_select = choice(trucks)#truck is randomly chosen
+                truck_select = choice(trucks)  # truck is randomly chosen
                 truck_select.pack(parcel)
         return unpacked
 
@@ -152,22 +156,140 @@ class GreedyScheduler(Scheduler):
                     with the most available space, and as we go through the
                     parcels we will choose trucks with less available space).
     """
+    config: Dict[str, str]
     parcel_priority: str
     parcel_order: str
     truck_order: str
 
-    def __init__(self, parcel_priority: str, parcel_order: str,
-                 truck_order: str) -> None:
+    def __init__(self, config: Dict[str, str]) -> None:
         """initialize GreedyScheduler"""
-        self.parcel_priority = parcel_priority
-        self.parcel_order = parcel_order
-        self.truck_order = truck_order
+        self.config = config
+        self.parcel_priority = config['parcel_priority']
+        self.parcel_order = config['parcel_order']
+        self.truck_order = config['truck_order']
 
     def schedule(self, parcels: List[Parcel], trucks: List[Truck],
                  verbose: bool = False) -> List[Parcel]:
         """Schedule the given <parcels> onto the given <trucks> by Parcel
         priority, parcel order, and truck order """
-        
+        unpacked = []
+        # ---- volume configuration ----
+        if self.parcel_priority == 'volume':
+            # Order parcels following configurations
+            ordered_parcels = self._order_parcels_volume(parcels)
+            # Loop over our ordered list of parcels until there are
+            # none left.
+            while not ordered_parcels.is_empty():
+                # Create an ordered truck list and reorder it every
+                # iteration so new data gets updated
+                ordered_trucks = self._order_trucks(trucks)
+                # Remove the top parcel of our list and store it in
+                # a new variable
+                priority_parcel = ordered_parcels.remove()
+                # Create a list of trucks that our Parcel fits in,
+                # stored in backwards order of priority, meaning
+                # the first item is the highest priority.
+                eligible_trucks = _list_packable(ordered_trucks,
+                                                 priority_parcel)
+                # If our Parcel doesn't fit in any truck, append it
+                # to the unpacked list
+                if not eligible_trucks:
+                    unpacked.append(priority_parcel)
+                else:
+                    # Check if the destination of our Parcel matches
+                    # with the last item in a truck route, if not, just
+                    # pack the parcel into the top truck.
+                    priority_truck = _check_same_locations(eligible_trucks,
+                                                           priority_parcel)
+                    priority_truck.pack(priority_parcel)
+
+        # ---- destination configuration ----
+        if self.parcel_priority == 'destination':
+            ordered_parcels = self._order_parcels_destination(parcels)
+            while not ordered_parcels.is_empty():
+                ordered_trucks = self._order_trucks(trucks)
+                priority_parcel = ordered_parcels.remove()
+                eligible_trucks = _list_packable(ordered_trucks,
+                                                 priority_parcel)
+                if not eligible_trucks:
+                    unpacked.append(priority_parcel)
+                else:
+                    priority_truck = _check_same_locations(eligible_trucks,
+                                                           priority_parcel)
+                    priority_truck.pack(priority_parcel)
+        return unpacked
+
+    # ----- Helper methods for Parcels -----
+
+    def _order_parcels_volume(self, parcels: List[Parcel]) \
+            -> Union[PriorityQueue, None]:
+        """Order the parcels based on volume configuration in either
+        non-decreasing or non-increasing order."""
+        if self.parcel_order == 'non-decreasing':
+            ordered_parcels = PriorityQueue(_parcel_volume_non_decreasing)
+            for parcel in parcels:
+                ordered_parcels.add(parcel)
+            return ordered_parcels
+        if self.parcel_order == 'non-increasing':
+            ordered_parcels = PriorityQueue(_parcel_volume_non_increasing)
+            for parcel in parcels:
+                ordered_parcels.add(parcel)
+            return ordered_parcels
+        return None
+
+    def _order_parcels_destination(self, parcels: List[Parcel]) \
+            -> Union[PriorityQueue, None]:
+        """Order the parcels based on destination configuration in
+        either non-decreasing or non-increasing order."""
+        if self.parcel_order == 'non-decreasing':
+            ordered_parcels = PriorityQueue(_parcel_destination_non_decreasing)
+            for parcel in parcels:
+                ordered_parcels.add(parcel)
+            return ordered_parcels
+        if self.parcel_order == 'non-increasing':
+            ordered_parcels = PriorityQueue(_parcel_destination_non_increasing)
+            for parcel in parcels:
+                ordered_parcels.add(parcel)
+            return ordered_parcels
+        return None
+
+    # ----- Helper methods for trucks -----
+
+    def _order_trucks(self, trucks: List[Truck]) \
+            -> Union[PriorityQueue, None]:
+        """Order trucks in either non-decreasing or non-increasing
+        order."""
+        if self.truck_order == 'non-decreasing':
+            ordered_trucks = PriorityQueue(_truck_least_available_space)
+            for truck in trucks:
+                ordered_trucks.add(truck)
+            return ordered_trucks
+        if self.truck_order == 'non-increasing':
+            ordered_trucks = PriorityQueue(_truck_most_available_space)
+            for truck in trucks:
+                ordered_trucks.add(truck)
+            return ordered_trucks
+        return None
+
+
+def _check_same_locations(trucks: List[Truck], parcel: Parcel) -> Truck:
+    """Find a Truck that has the parcel's destination as its last stop.
+    Return the first item in the list if it doesn't find anything"""
+    for truck in trucks:
+        if truck.route[-1] == parcel.destination:
+            return truck
+    return trucks[0]
+
+
+def _list_packable(trucks: PriorityQueue, parcel: Parcel) \
+        -> List[Truck]:
+    """Return a list of all packable trucks with respect to one Parcel."""
+    eligible_trucks = []
+    while not trucks.is_empty():
+        priority_truck = trucks.remove()
+        if priority_truck.packable(parcel):
+            eligible_trucks.append(priority_truck)
+    return eligible_trucks
 
 
 def _parcel_volume_non_decreasing(p1: Parcel, p2: Parcel) -> bool:
@@ -177,7 +299,7 @@ def _parcel_volume_non_decreasing(p1: Parcel, p2: Parcel) -> bool:
     >>> _parcel_volume_non_decreasing(parcel_1, parcel_2)
     True
     """
-    return p1.volume <= p2.volume
+    return p1.volume < p2.volume
 
 
 def _parcel_volume_non_increasing(p1: Parcel, p2: Parcel) -> bool:
@@ -187,7 +309,7 @@ def _parcel_volume_non_increasing(p1: Parcel, p2: Parcel) -> bool:
     >>> _parcel_volume_non_increasing(parcel_1, parcel_2)
     True
     """
-    return p1.volume >= p2.volume
+    return p1.volume > p2.volume
 
 
 def _parcel_destination_non_decreasing(p1: Parcel, p2: Parcel) -> bool:
@@ -197,17 +319,17 @@ def _parcel_destination_non_decreasing(p1: Parcel, p2: Parcel) -> bool:
     >>> _parcel_destination_non_decreasing(parcel_1, parcel_2)
     True
     """
-    return min(p1.destination, p2.destination) == p1
+    return p1.destination < p2.destination
 
 
 def _parcel_destination_non_increasing(p1: Parcel, p2: Parcel) -> bool:
     """Return if Parcel p1 is larger alphabetically than Parcel p2.
-    >>> parcel_1 = Parcel(1, 2, 'Toronto', 'Ottawa')
-    >>> parcel_2 = Parcel(2, 3, 'Toronto', 'Calgary')
+    >>> parcel_1 = Parcel(1, 2, 'Toronto', 'Calgary')
+    >>> parcel_2 = Parcel(2, 3, 'Toronto', 'Ottawa')
     >>> _parcel_destination_non_decreasing(parcel_1, parcel_2)
     True
     """
-    return max(p1.destination, p2.destination) == p1
+    return p1.destination > p2.destination
 
 
 def _truck_most_available_space(t1: Truck, t2: Truck) -> bool:
@@ -217,7 +339,7 @@ def _truck_most_available_space(t1: Truck, t2: Truck) -> bool:
     >>> _truck_most_available_space(truck_1, truck_2)
     True
     """
-    return t1.fullness() <= t2.fullness()
+    return t1.volume_capacity - t1.stored > t2.volume_capacity - t2.stored
 
 
 def _truck_least_available_space(t1: Truck, t2: Truck) -> bool:
@@ -227,14 +349,16 @@ def _truck_least_available_space(t1: Truck, t2: Truck) -> bool:
     >>> _truck_least_available_space(truck_1, truck_2)
     True
     """
-    return t1.fullness() >= t2.fullness()
+    return t1.volume_capacity - t1.stored < t2.volume_capacity - t2.stored
 
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()
 
     import python_ta
+
     python_ta.check_all(config={
         'allowed-io': ['compare_algorithms'],
         'allowed-import-modules': ['doctest', 'python_ta', 'typing',
