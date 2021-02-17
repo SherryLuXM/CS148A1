@@ -23,24 +23,20 @@ from the map file. (All reading from files is done in module experiment.)
 Instead, it provides public methods that can be called to store and look up
 distances.
 """
-from typing import Dict, Optional, Tuple
+from typing import Dict
 
 
 class DistanceMap:
     """Lets client code store and look up the distance betweeen any two
     cities.
-
     === Attributes ===
-
     _distances: A dictionary that keeps track of the distance between two
         cities, each key item is a Tuple that contains two strings representing
         two cities, and its value is an integer which is the distance between
         them. Keep in mind the distance from city A to city B could be different
         than the distance from city B to city A!
-
     === Representation Invariants ===
     - The distance between cities must not be negative.
-
     === Sample Usage ===
     >>> d = DistanceMap()
     >>> d.add_distance('Toronto', 'Montreal', 10)
@@ -50,7 +46,7 @@ class DistanceMap:
     >>> d.distance('Toronto', 'Ottawa')
     -1
     """
-    _distances: Dict[Tuple[str, str], int]
+    _distances: Dict[list[str, str], int]
 
     def __init__(self) -> None:
         """Create an empty dictionary which will serve as the distance
@@ -72,18 +68,18 @@ class DistanceMap:
         >>> d.distance('Toronto', 'Ottawa')
         -1
         """
-        self._distances[(city_a, city_b)] = distance
+        self._distances[[city_a, city_b]] = distance
 
-    def distance(self, city_a: str, city_b: str) -> Optional[int]:
+    def distance(self, city_a: str, city_b: str) -> int:
         """Return the distance between two cities stored in _distances.
-        Return None if those cities haven't been stored."""
+        Return -1 if those cities haven't been stored."""
 
         for cities in self._distances:
             if (city_a, city_b) == cities:
                 return self._distances[cities]
-        return None
-    
-    
+        return -1
+
+
 if __name__ == '__main__':
     import python_ta
     python_ta.check_all(config={
