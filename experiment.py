@@ -102,11 +102,9 @@ class SchedulingExperiment:
         self._stats = {}
         self._unscheduled = []
 
+
     def run(self, report: bool = False) -> Dict[str, Union[int, float]]:
         """Run the experiment and return statistics on the outcome.
-
-        The return value is a dictionary with keys and values are as specified
-        in Step 6 of Assignment 1.
 
         If <report> is True, print a report on the statistics from this
         experiment.  Either way, return the statistics in a dictionary.
@@ -114,9 +112,7 @@ class SchedulingExperiment:
         If <self.verbose> is True, print step-by-step details
         regarding the scheduling algorithm as it runs.
         """
-        # TODO: Ask the scheduler to schedule the parcels onto trucks.
-        # TODO: Save the unscheduled parcels in self._unscheduled.
-
+        self._unscheduled = self.scheduler.schedule(self.parcels, self.fleet.trucks, self.verbose)
         self._compute_stats()
         if report:
             self._print_report()
@@ -124,32 +120,44 @@ class SchedulingExperiment:
 
     def _compute_stats(self) -> None:
         """Compute the statistics for this experiment, and store in
-        <self>.stats. Keys and values are as specified in Step 6 of
-        Assignment 1.
+        <self>.stats. 
+        
+        fleet: the number of trucks in the fleet
+        unused_trucks: the number of unused trucks (trucks that have no parcels)
+        avg_distance: among the used trucks, the average distance they will have to travel to follow their scheduled
+        route
+        avg_fullness: among the used trucks, their average fullness. The fullness of a truck is the percentage of its
+        volume that is taken by parcels
+        unused_space: among the used trucks, their total unused space. The unused space of a truck is the amount (not
+        percentage) of its volume that is not taken by parcels
+        unscheduled: the number of unscheduled parcels (parcels that did not fit onto any truck)
 
         Precondition: _run has already been called.
         """
-        # TODO: Replace the 0 values below with the correct statistics.
+        flt = self.fleet
         self._stats = {
-            'fleet': 0,
-            'unused_trucks': 0,
-            'avg_distance': 0,
-            'avg_fullness': 0,
-            'unused_space': 0,
-            'unscheduled': 0
+            'fleet': flt.num_trucks(),
+            'unused_trucks': flt.num_trucks() - flt.num_nonempty_trucks(),
+            'avg_distance': flt.average_distance_travelled(self.dmap),
+            'avg_fullness': flt.average_fullness(),
+            'unused_space': flt.total_unused_space(),
+            'unscheduled': len(self._unscheduled)
         }
 
     def _print_report(self) -> None:
         """Report on the statistics for this experiment.
 
-        This method is *only* for debugging purposes for your benefit, so
-        the content and format of the report is your choice; we
-        will not call your run method with <report> set to True.
-
         Precondition: _compute_stats has already been called.
         """
-        # TODO: Implement this method!
-        pass
+        stat = self._stats
+        info = f'Experiment Statistics: '\
+               f'{stat["fleet"]} truck(s) in the fleet' \
+               f'{stat["unused_trucks"]} unused truck(s)' \
+               f'Truck(s) travel {stat["avg_distance"]} unit(s) on average.' \
+               f'In-use truck(s) is {stat["avg_fullness"]} percents full on average' \
+               f'Total unused space on delivering trucks are {stat["unused_space"]}' \
+               f'Undelivered parcels: {stat["unscheduled"]}'
+        print(info)
 
 
 # ----- Helper functions -----
