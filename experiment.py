@@ -166,10 +166,15 @@ class SchedulingExperiment:
 def read_parcels(parcel_file: str) -> List[Parcel]:
     """Read parcel data from <parcel_file> and return.
 
-    Precondition: <parcel_file> is the path to a file containing parcel data in
+    Parcel file format:
+    <parcel_id>, <source>, <destination>, <parcel_volume>
+
+    === Preconditions ===
+    <parcel_file> is the path to a file containing parcel data in
                   the form specified in Assignment 1.
+    Parcel IDs may occur in any order and need not be consecutive, but no parcel ID occurs more than once in the file.
     """
-    # TODO: Initialize any variable(s) as needed.
+    plist = []
     # read and add the parcels to the list.
     with open(parcel_file, 'r') as file:
         for line in file:
@@ -178,18 +183,20 @@ def read_parcels(parcel_file: str) -> List[Parcel]:
             source = tokens[1].strip()
             destination = tokens[2].strip()
             volume = int(tokens[3].strip())
-            # TODO: Do something with pid, source, destination and volume.
-    # TODO: Return something.
+            plist.append(Parcel(pid, volume, source, destination))
+    return plist
 
 
 def read_distance_map(distance_map_file: str) -> DistanceMap:
     """Read distance data from <distance_map_file> and return a DistanceMap
     that records it.
 
-    Precondition: <distance_map_file> is the path to a file containing distance
-                  data in the form specified in Assignment 1.
+    Map file format:
+    <city1>, <city2>, <distance1> [, <distance2> ]
+
+    === Preconditions ===
+    <distance_map_file> is the path to a file containing distance data in the form specified in Assignment 1.
     """
-    # TODO: Initialize any variable(s) as needed.
     with open(distance_map_file, 'r') as file:
         for line in file:
             tokens = line.strip().split(',')
@@ -198,25 +205,31 @@ def read_distance_map(distance_map_file: str) -> DistanceMap:
             distance1 = int(tokens[2].strip())
             distance2 = int(tokens[3].strip()) if len(tokens) == 4 \
                 else distance1
-            # TODO: Do something with c1, c2, distance1, and distance2
-    # TODO: Return something.
+            dmap = DistanceMap()
+            d.add_distance(c1, c2, distance1)
+            d.add_distance(c1, c2, distance2)
+    return dmap
 
 
 def read_trucks(truck_file: str, depot_location: str) -> Fleet:
     """Read truck data from <truck_file> and return a Fleet containing these
     trucks, with each truck starting at the <depot_location>.
 
-    Precondition: <truck_file> is a path to a file containing truck data in the
-                  form specified in Assignment 1.
+    Truck file format:
+    <truck_id>, <truck_volume>
+
+    === Preconditions ===
+    <truck_file> is a path to a file containing truck data in the form specified in Assignment 1.
+    Truck IDs may occur in any order and need not be consecutive, but no truck ID occurs more than once in the file.
     """
-    # TODO: Initialize any variable(s) as needed.
+    flt = Fleet()
     with open(truck_file, 'r') as file:
         for line in file:
             tokens = line.strip().split(',')
             tid = int(tokens[0])
             capacity = int(tokens[1])
-            # TODO: Do something with tid, capacity, and depot_location.
-    # TODO: Return something.
+            flt.add_truck(Truck(tid, capacity, depot_location))
+    return flt
 
 
 def simple_check(config_file: str) -> None:
