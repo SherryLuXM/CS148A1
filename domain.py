@@ -193,13 +193,6 @@ class Fleet:
 
     def add_truck(self, truck: Truck) -> None:
         """Add <truck> to this fleet.
-        algorithm: either ‘random’ or ‘greedy’.
-        truck_order: either ‘non-decreasing’ (meaning we choose the eligible
-        truck with the least available space, and as go through the parcels
-        we choose trucks with greater available space), or ‘non-increasing’
-        (meaning we choose the eligible truck with the most available space,
-        and as we go through the parcels we will choose trucks with
-        less available space).
 
         Precondition: No truck with the same ID as <truck> has already been
         added to this Fleet.
@@ -215,6 +208,14 @@ class Fleet:
     # to you.
     def __str__(self) -> str:
         """Produce a string representation of this fleet
+        
+        >>> f = Fleet()
+        >>> t1 = Truck(1423, 10, 'Toronto')
+        >>> f.add_truck(t1)
+        >>> print(f)
+        Information of all trucks in the fleet:
+        ID: 1423; Depot: Toronto; Storage: 0/10; Route: ['Toronto']
+        Total: 1 trucks
         """
         info = 'Information of all trucks in the fleet:'
         for truck in self.trucks:
