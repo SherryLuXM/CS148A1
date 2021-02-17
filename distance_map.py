@@ -31,10 +31,9 @@ class DistanceMap:
     cities.
     === Attributes ===
     _distances: A dictionary that keeps track of the distance between two
-        cities, each key item is a Tuple that contains two strings representing
-        two cities, and its value is an integer which is the distance between
-        them. Keep in mind the distance from city A to city B could be different
-        than the distance from city B to city A!
+        cities, each key item is a string with one city name, and its value is a dictionary which takes another city
+        as destination and an integer which is the distance between them. Keep in mind the distance from city A to city
+        B could be different than the distance from city B to city A!
     === Representation Invariants ===
     - The distance between cities must not be negative.
     === Sample Usage ===
@@ -46,17 +45,17 @@ class DistanceMap:
     >>> d.distance('Toronto', 'Ottawa')
     -1
     """
-    _distances: Dict[list[str, str], int]
+    _distances: Dict[str, Dict[str, int]]
 
     def __init__(self) -> None:
         """Create an empty dictionary which will serve as the distance
         storage."""
         self._distances = {}
 
-    def add_distance(self, city_a: str, city_b: str, distance: int = -1) -> \
-            None:
-        """Add the distance between two cities to our private dictionary.
+    def add_distance(self, city_a: str, city_b: str, distance: int = -1) -> None:
+        """Add the distance from <city_a> to <city_b> to our private dictionary.
         If no distance parameter is passed, add -1 as the distance.
+
         >>> d = DistanceMap()
         >>> d.add_distance('Edmonton', 'Toronto', 40)
         >>> d.add_distance('Toronto', 'Calgary', 45)
@@ -68,16 +67,20 @@ class DistanceMap:
         >>> d.distance('Toronto', 'Ottawa')
         -1
         """
-        self._distances[[city_a, city_b]] = distance
+        try:
+            self._distances[city_a][city_b] = distance
+        except KeyError:
+            self._distances[city_a] = {}
+            self._distances[city_a][city_b] = distance
 
     def distance(self, city_a: str, city_b: str) -> int:
-        """Return the distance between two cities stored in _distances.
-        Return -1 if those cities haven't been stored."""
-
-        for cities in self._distances:
-            if (city_a, city_b) == cities:
-                return self._distances[cities]
-        return -1
+        """Return the distance from <city_a> to <city_b> stored in _distances.
+        Return -1 if those cities haven't been stored.
+        """
+        try:
+            return self._distances[city_a][city_b]
+        except KeyError:
+            return -1
 
 
 if __name__ == '__main__':
