@@ -90,10 +90,7 @@ class SchedulingExperiment:
         if config['algorithm'] == 'random':
             self.scheduler = RandomScheduler()
         if config['algorithm'] == 'greedy':
-            self.scheduler = GreedyScheduler(config['parcel_priority'],
-                                             config['parcel_order'],
-                                             config['truck_order'])
-
+            self.scheduler = GreedyScheduler(config)
         self.parcels = read_parcels(config['parcel_file'])
         self.fleet = read_trucks(config['truck_file'],
                                  config['depot_location'])
