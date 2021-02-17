@@ -87,8 +87,12 @@ class SchedulingExperiment:
         in Assignment 1.
         """
         self.verbose = config['verbose']
-        # TODO: Use <config> to determine what sort of scheduler we need.
-        # TODO: Then make one of that sort and save it in self.scheduler.
+        if config['algorithm'] == 'random':
+            self.scheduler = RandomScheduler()
+        if config['algorithm'] == 'greedy':
+            self.scheduler = GreedyScheduler(config['parcel_priority'],
+                                             config['parcel_order'],
+                                             config['truck_order'])
 
         self.parcels = read_parcels(config['parcel_file'])
         self.fleet = read_trucks(config['truck_file'],
