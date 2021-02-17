@@ -206,8 +206,8 @@ def read_distance_map(distance_map_file: str) -> DistanceMap:
             distance2 = int(tokens[3].strip()) if len(tokens) == 4 \
                 else distance1
             dmap = DistanceMap()
-            d.add_distance(c1, c2, distance1)
-            d.add_distance(c1, c2, distance2)
+            dmap.add_distance(c1, c2, distance1)
+            dmap.add_distance(c1, c2, distance2)
     return dmap
 
 
