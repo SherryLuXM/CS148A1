@@ -89,7 +89,7 @@ class SchedulingExperiment:
         self.verbose = config['verbose']
         if config['algorithm'] == 'random':
             self.scheduler = RandomScheduler()
-        if config['algorithm'] == 'greedy':
+        else:
             self.scheduler = GreedyScheduler(config)
         self.parcels = read_parcels(config['parcel_file'])
         self.fleet = read_trucks(config['truck_file'],
@@ -98,7 +98,6 @@ class SchedulingExperiment:
 
         self._stats = {}
         self._unscheduled = []
-
 
     def run(self, report: bool = False) -> Dict[str, Union[int, float]]:
         """Run the experiment and return statistics on the outcome.
@@ -109,7 +108,9 @@ class SchedulingExperiment:
         If <self.verbose> is True, print step-by-step details
         regarding the scheduling algorithm as it runs.
         """
-        self._unscheduled = self.scheduler.schedule(self.parcels, self.fleet.trucks, self.verbose)
+        trks = self.fleet.trucks
+        vbose = self.verbose
+        self._unscheduled = self.scheduler.schedule(self.parcels, trks, vbose)
         self._compute_stats()
         if report:
             self._print_report()
@@ -117,17 +118,20 @@ class SchedulingExperiment:
 
     def _compute_stats(self) -> None:
         """Compute the statistics for this experiment, and store in
-        <self>.stats. 
-        
-        fleet: the number of trucks in the fleet
-        unused_trucks: the number of unused trucks (trucks that have no parcels)
-        avg_distance: among the used trucks, the average distance they will have to travel to follow their scheduled
-        route
-        avg_fullness: among the used trucks, their average fullness. The fullness of a truck is the percentage of its
-        volume that is taken by parcels
-        unused_space: among the used trucks, their total unused space. The unused space of a truck is the amount (not
-        percentage) of its volume that is not taken by parcels
-        unscheduled: the number of unscheduled parcels (parcels that did not fit onto any truck)
+        <self>.stats.
+
+        - fleet: the number of trucks in the fleet
+        - unused_trucks: the number of empty trucks
+        - avg_distance: among the used trucks, the average distance they will 
+        have to travel to follow their scheduled route
+        - avg_fullness: among the used trucks, their average fullness. The 
+        fullness of a truck is the percentage of its volume that is taken by 
+        parcels
+        - unused_space: among the used trucks, their total unused space. The 
+        unused space of a truck is the amount (not percentage) of its volume 
+        that is not taken by parcels
+        - unscheduled: the number of unscheduled parcels (parcels that did not 
+        fit onto any truck)
 
         Precondition: _run has already been called.
         """
@@ -151,8 +155,8 @@ class SchedulingExperiment:
                f'{stat["fleet"]} truck(s) in the fleet' \
                f'{stat["unused_trucks"]} unused truck(s)' \
                f'Truck(s) travel {stat["avg_distance"]} unit(s) on average.' \
-               f'In-use truck(s) is {stat["avg_fullness"]} percents full on average' \
-               f'Total unused space on delivering trucks are {stat["unused_space"]}' \
+               f'Average fullness of used truck(s) is {stat["avg_fullness"]}%' \
+               f'Total unused space on used trucks are {stat["unused_space"]}' \
                f'Undelivered parcels: {stat["unscheduled"]}'
         print(info)
 
@@ -169,7 +173,8 @@ def read_parcels(parcel_file: str) -> List[Parcel]:
     === Preconditions ===
     <parcel_file> is the path to a file containing parcel data in
                   the form specified in Assignment 1.
-    Parcel IDs may occur in any order and need not be consecutive, but no parcel ID occurs more than once in the file.
+    Parcel IDs may occur in any order and need not be consecutive, but no parcel
+     ID occurs more than once in the file.
     """
     plist = []
     # read and add the parcels to the list.
@@ -192,7 +197,8 @@ def read_distance_map(distance_map_file: str) -> DistanceMap:
     <city1>, <city2>, <distance1> [, <distance2> ]
 
     === Preconditions ===
-    <distance_map_file> is the path to a file containing distance data in the form specified in Assignment 1.
+    <distance_map_file> is the path to a file containing distance data in the 
+    form specified in Assignment 1.
     """
     with open(distance_map_file, 'r') as file:
         for line in file:
@@ -203,8 +209,7 @@ def read_distance_map(distance_map_file: str) -> DistanceMap:
             distance2 = int(tokens[3].strip()) if len(tokens) == 4 \
                 else distance1
             dmap = DistanceMap()
-            dmap.add_distance(c1, c2, distance1)
-            dmap.add_distance(c1, c2, distance2)
+            dmap.add_distance(c1, c2, distance1, distance2)
     return dmap
 
 
@@ -216,8 +221,10 @@ def read_trucks(truck_file: str, depot_location: str) -> Fleet:
     <truck_id>, <truck_volume>
 
     === Preconditions ===
-    <truck_file> is a path to a file containing truck data in the form specified in Assignment 1.
-    Truck IDs may occur in any order and need not be consecutive, but no truck ID occurs more than once in the file.
+    <truck_file> is a path to a file containing truck data in the form specified
+     in Assignment 1.
+    Truck IDs may occur in any order and need not be consecutive, but no truck 
+    ID occurs more than once in the file.
     """
     flt = Fleet()
     with open(truck_file, 'r') as file:
