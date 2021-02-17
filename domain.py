@@ -118,8 +118,6 @@ class Truck:
         True
         >>> t.pack(p1)
         True
-        >>> t.packable(p2)
-        False
         >>> t.pack(p2)
         False
         >>> t.route[-1]
@@ -148,7 +146,7 @@ class Truck:
         50.0
         """
         # First, check if there's enough space to fit the parcel.
-        if self.packable(parcel):
+        if parcel.volume + self.stored <= self.volume_capacity:
             # Add the parcel to the Truck.
             self.stored += parcel.volume
             self.parcels.append(parcel)
@@ -208,7 +206,7 @@ class Fleet:
     # to you.
     def __str__(self) -> str:
         """Produce a string representation of this fleet
-        
+
         >>> f = Fleet()
         >>> t1 = Truck(1423, 10, 'Toronto')
         >>> f.add_truck(t1)
@@ -219,7 +217,7 @@ class Fleet:
         """
         info = 'Information of all trucks in the fleet:'
         for truck in self.trucks:
-            info = info + '\n' + f'ID: {Truck.id_}; Depot: {truck.depot}; ' \
+            info = info + '\n' + f'ID: {truck.id_}; Depot: {truck.depot}; ' \
                                  f'Storage: {truck.stored}/' \
                                  f'{truck.volume_capacity}; ' \
                                  f'Route: {truck.route}'
@@ -299,7 +297,6 @@ class Fleet:
         """Return the total unused space, summed over all non-empty trucks in
         the fleet.
         If there are no non-empty trucks in the fleet, return 0.
-
         >>> f = Fleet()
         >>> f.total_unused_space()
         0
@@ -320,7 +317,6 @@ class Fleet:
     def _total_fullness(self) -> float:
         """Return the sum of truck.fullness() for each non-empty truck in the
         fleet. If there are no non-empty trucks, return 0.
-
         >>> f = Fleet()
         >>> f._total_fullness() == 0.0
         True
@@ -343,9 +339,7 @@ class Fleet:
     def average_fullness(self) -> float:
         """Return the average percent fullness of all non-empty trucks in the
         fleet.
-
         Precondition: At least one truck is non-empty.
-
         >>> f = Fleet()
         >>> t = Truck(1423, 10, 'Toronto')
         >>> p = Parcel(1, 5, 'Buffalo', 'Hamilton')
@@ -365,10 +359,8 @@ class Fleet:
     def total_distance_travelled(self, dmap: DistanceMap) -> int:
         """Return the total distance travelled by the trucks in this fleet,
         according to the distances in <dmap>.
-
         Precondition: <dmap> contains all distances required to compute the
                       average distance travelled.
-
         >>> f = Fleet()
         >>> t1 = Truck(1423, 10, 'Toronto')
         >>> p1 = Parcel(1, 5, 'Toronto', 'Hamilton')
@@ -378,7 +370,6 @@ class Fleet:
         >>> p2 = Parcel(2, 5, 'Toronto', 'Hamilton')
         >>> t2.pack(p2)
         True
-        >>> from distance_map import DistanceMap
         >>> m = DistanceMap()
         >>> m.add_distance('Toronto', 'Hamilton', 9)
         >>> f.add_truck(t1)
@@ -395,8 +386,7 @@ class Fleet:
             if len(truck.route) > 1:
                 while i < len(truck.route) - 1:
                     # look up the distances on our distances dictionary.
-                    total_distance += dmap.distances[(truck.route[i],
-                                                      truck.route[i + 1])]
+                    total_distance += dmap.distance(truck.route[i], truck.route[i + 1])
                     i += 1
             i = 0
         # The trucks must always return to the depot, therefore they
@@ -406,15 +396,12 @@ class Fleet:
     def average_distance_travelled(self, dmap: DistanceMap) -> float:
         """Return the average distance travelled by the trucks in this fleet,
         according to the distances in <dmap>.
-
         Include in the average only trucks that have actually travelled some
         non-zero distance.
-
         Preconditions:
         - <dmap> contains all distances required to compute the average
           distance travelled.
         - At least one truck has travelled a non-zero distance.
-
         >>> f = Fleet()
         >>> t1 = Truck(1423, 10, 'Toronto')
         >>> p1 = Parcel(1, 5, 'Toronto', 'Hamilton')
@@ -424,7 +411,6 @@ class Fleet:
         >>> p2 = Parcel(2, 5, 'Toronto', 'Hamilton')
         >>> t2.pack(p2)
         True
-        >>> from distance_map import DistanceMap
         >>> m = DistanceMap()
         >>> m.add_distance('Toronto', 'Hamilton', 9)
         >>> f.add_truck(t1)
@@ -443,7 +429,6 @@ class Fleet:
 
 if __name__ == '__main__':
     import python_ta
-
     python_ta.check_all(config={
         'allowed-import-modules': ['doctest', 'python_ta', 'typing',
                                    'distance_map'],
@@ -451,5 +436,4 @@ if __name__ == '__main__':
         'max-attributes': 15,
     })
     import doctest
-
     doctest.testmod()
