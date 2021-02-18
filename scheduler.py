@@ -272,13 +272,16 @@ class GreedyScheduler(Scheduler):
         return None
 
 
-def _check_same_locations(trucks: List[Truck], parcel: Parcel) -> Truck:
-    """Find a Truck that has the parcel's destination as its last stop.
-    Return the first item in the list if it doesn't find anything"""
+def _check_same_locations(trucks: List[Truck], parcel: Parcel) -> List[Truck]:
+    """Filter trucks from <trucks> that share parcel's destination.
+    
+    add a doctest below for having one elible truck, and for having none
+    """
+    eligible = []
     for truck in trucks:
         if truck.route[-1] == parcel.destination:
-            return truck
-    return trucks[0]
+            eligible.append(truck)
+    return eligible
 
 
 def _list_packable(trucks: PriorityQueue, parcel: Parcel) \
