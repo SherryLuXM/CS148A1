@@ -200,6 +200,7 @@ def read_distance_map(distance_map_file: str) -> DistanceMap:
     <distance_map_file> is the path to a file containing distance data in the 
     form specified in Assignment 1.
     """
+    dmap = DistanceMap()
     with open(distance_map_file, 'r') as file:
         for line in file:
             tokens = line.strip().split(',')
@@ -208,7 +209,6 @@ def read_distance_map(distance_map_file: str) -> DistanceMap:
             distance1 = int(tokens[2].strip())
             distance2 = int(tokens[3].strip()) if len(tokens) == 4 \
                 else distance1
-            dmap = DistanceMap()
             dmap.add_distance(c1, c2, distance1, distance2)
     return dmap
 
