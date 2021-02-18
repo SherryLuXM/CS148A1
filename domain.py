@@ -27,13 +27,16 @@ from distance_map import DistanceMap
 class Parcel:
     """Create a parcel. Each parcel has a unique ID, volume (measured
     in cc), and a source and destination.
+
     === Public Attributes ===
     id_: a parcel's unique ID
     volume: how much space a parcel takes up in cubic centimetres
     source: name of the city it came from
     destination: name of the city its being delivered to
+
     === Representation Invariants ===
-    - the volume can't be negative.
+    - volume > 0
+    - destination is not the depot
     === Sample Usage ===
     >>> p = Parcel(1, 10, 'Toronto', 'Calgary')
     >>> p.id_ == 1
@@ -61,6 +64,7 @@ class Parcel:
 class Truck:
     """Create an instance of a truck. Each truck has a unique ID,
     volume capacity, and a Route.
+
     === Public Attributes ===
     id_: a truck's ID number
     volume_capacity: the maximum amount of volume a truck can
@@ -69,10 +73,13 @@ class Truck:
     stored: how much volume is stored onto the Truck,
         all trucks are initially empty.
     route: an ordered List of city names that a truck is supposed to
-        go through. All trucks will initially have the depot on their
-        routes
+        go through.
+
     === Representation Invariants ===
-    - stored <= volume_capacity
+    - 0 <= stored <= volume_capacity
+    - volume_capacity > 0
+    - route[0] == depot
+
     === Sample Usage ===
     >>> t = Truck(1200, 10, 'Toronto')
     >>> t.id_ == 1200
@@ -130,9 +137,9 @@ class Truck:
     def pack(self, parcel: Parcel) -> bool:
         """Pack the Truck with a Parcel, return True if it has been
         successfully packed. Return False if stored exceeds
-        volume_capacity. Add the parcel's destination to the end
-        of the Truck's route unless the LAST item is equal to the
-        destination.
+        volume_capacity.
+        Add the parcel's destination to the end of the Truck's route unless the
+        LAST item is equal to the destination.
         >>> t = Truck(1000, 10, 'Toronto')
         >>> p1 = Parcel(1, 5, 'Toronto', 'Ottawa')
         >>> p2 = Parcel(2, 6, 'Toronto', 'Calgary')
@@ -146,7 +153,7 @@ class Truck:
         50.0
         """
         # First, check if there's enough space to fit the parcel.
-        if parcel.volume + self.stored <= self.volume_capacity:
+        if self.packable(parcel):
             # Add the parcel to the Truck.
             self.stored += parcel.volume
             self.parcels.append(parcel)
@@ -172,6 +179,31 @@ class Truck:
         """
         return (100 * self.stored) / self.volume_capacity
 
+    def distance(self, dmap: DistanceMap) -> int:
+        """calculate the distance travelled by this truck, with data from <dmap>
+
+        >>> t = Truck(1333, 10, 'Toronto')
+        >>> p = Parcel(2, 5, 'Toronto', 'Hamilton')
+        >>> t.pack(p)
+        True
+        >>> m = DistanceMap()
+        >>> m.add_distance('Toronto', 'Hamilton', 9)
+        >>> t.distance(m)
+        18
+        """
+        i = 0
+        d_total = 0
+        while i < len(self.route) - 1:
+            # look up the distances on our distances dictionary.
+            # assume that <dmap> always has the needed information
+            d_total += dmap.distance(self.route[i], self.route[i + 1])
+            i += 1
+        # the truck needs to return to depot at the end of route
+        final = dmap.distance(self.route[i], self.depot)
+        if self.route[i] != self.depot and final > 0:
+            d_total += final
+        return d_total
+
 
 class Fleet:
     """ A fleet of trucks for making deliveries.
@@ -183,6 +215,7 @@ class Fleet:
 
     def __init__(self) -> None:
         """Create a Fleet with no trucks.
+
         >>> f = Fleet()
         >>> f.num_trucks()
         0
@@ -213,7 +246,7 @@ class Fleet:
         >>> print(f)
         Information of all trucks in the fleet:
         ID: 1423; Depot: Toronto; Storage: 0/10; Route: ['Toronto']
-        Total: 1 trucks
+        Total: 1 truck(s)
         """
         info = 'Information of all trucks in the fleet:'
         for truck in self.trucks:
@@ -221,11 +254,13 @@ class Fleet:
                                  f'Storage: {truck.stored}/' \
                                  f'{truck.volume_capacity}; ' \
                                  f'Route: {truck.route}'
-        info += f'\nTotal: {self.num_trucks()} trucks'
+
+        info += f'\nTotal: {self.num_trucks()} truck(s)'
         return info
 
     def num_trucks(self) -> int:
         """Return the number of trucks in this fleet.
+
         >>> f = Fleet()
         >>> t1 = Truck(1423, 10, 'Toronto')
         >>> f.add_truck(t1)
@@ -236,6 +271,7 @@ class Fleet:
 
     def num_nonempty_trucks(self) -> int:
         """Return the number of non-empty trucks in this fleet.
+
         >>> f = Fleet()
         >>> t1 = Truck(1423, 10, 'Toronto')
         >>> f.add_truck(t1)
@@ -269,6 +305,7 @@ class Fleet:
         """Return a dictionary in which each key is the ID of a truck in this
         fleet and its value is a list of the IDs of the parcels packed onto it,
         in the order in which they were packed.
+
         >>> f = Fleet()
         >>> t1 = Truck(1423, 10, 'Toronto')
         >>> p1 = Parcel(27, 5, 'Toronto', 'Hamilton')
@@ -297,6 +334,7 @@ class Fleet:
         """Return the total unused space, summed over all non-empty trucks in
         the fleet.
         If there are no non-empty trucks in the fleet, return 0.
+
         >>> f = Fleet()
         >>> f.total_unused_space()
         0
@@ -309,14 +347,16 @@ class Fleet:
         995
         """
         unused_space = 0
-        if self.trucks:
-            for truck in self.trucks:
-                unused_space += (truck.volume_capacity - truck.stored)
+        for truck in self.trucks:
+            stored = truck.stored
+            if stored != 0:
+                unused_space += (truck.volume_capacity - stored)
         return unused_space
 
     def _total_fullness(self) -> float:
         """Return the sum of truck.fullness() for each non-empty truck in the
         fleet. If there are no non-empty trucks, return 0.
+
         >>> f = Fleet()
         >>> f._total_fullness() == 0.0
         True
@@ -330,16 +370,17 @@ class Fleet:
         >>> f._total_fullness()
         50.0
         """
-        fullness = 0
-        if self.trucks:
-            for truck in self.trucks:
-                fullness += truck.fullness()
-        return fullness
+        flt_fullness = 0
+        for truck in self.trucks:
+            flt_fullness += truck.fullness()
+        return flt_fullness
 
     def average_fullness(self) -> float:
         """Return the average percent fullness of all non-empty trucks in the
         fleet.
+
         Precondition: At least one truck is non-empty.
+
         >>> f = Fleet()
         >>> t = Truck(1423, 10, 'Toronto')
         >>> p = Parcel(1, 5, 'Buffalo', 'Hamilton')
@@ -349,18 +390,15 @@ class Fleet:
         >>> f.average_fullness()
         50.0
         """
-        non_empty_trucks = 0
-        for truck in self.trucks:
-            # Only add non-empty trucks.
-            if truck.stored != 0:
-                non_empty_trucks += 1
-        return self._total_fullness() / non_empty_trucks
+        return self._total_fullness() / self.num_nonempty_trucks()
 
     def total_distance_travelled(self, dmap: DistanceMap) -> int:
         """Return the total distance travelled by the trucks in this fleet,
         according to the distances in <dmap>.
+
         Precondition: <dmap> contains all distances required to compute the
                       average distance travelled.
+
         >>> f = Fleet()
         >>> t1 = Truck(1423, 10, 'Toronto')
         >>> p1 = Parcel(1, 5, 'Toronto', 'Hamilton')
@@ -377,31 +415,22 @@ class Fleet:
         >>> f.total_distance_travelled(m)
         36
         """
-        total_distance = 0
-        i = 0
+        total_d = 0
         for truck in self.trucks:
-            # Only check the trucks that have more than one city on their
-            # route, since a truck with only a depot will have travelled
-            # a distance of 0.
-            if len(truck.route) > 1:
-                while i < len(truck.route) - 1:
-                    # look up the distances on our distances dictionary.
-                    total_distance += dmap.distance(truck.route[i], truck.route[i + 1])
-                    i += 1
-            i = 0
-        # The trucks must always return to the depot, therefore they
-        # travel double the total_distance
-        return total_distance * 2
+            total_d += truck.distance(dmap)
+        return total_d
 
     def average_distance_travelled(self, dmap: DistanceMap) -> float:
         """Return the average distance travelled by the trucks in this fleet,
         according to the distances in <dmap>.
         Include in the average only trucks that have actually travelled some
         non-zero distance.
-        Preconditions:
+
+        === Preconditions ===
         - <dmap> contains all distances required to compute the average
           distance travelled.
         - At least one truck has travelled a non-zero distance.
+
         >>> f = Fleet()
         >>> t1 = Truck(1423, 10, 'Toronto')
         >>> p1 = Parcel(1, 5, 'Toronto', 'Hamilton')
@@ -418,13 +447,13 @@ class Fleet:
         >>> f.average_distance_travelled(m)
         18.0
         """
-        times_travelled = 0
+        total = self.total_distance_travelled(dmap)
+        count = 0
         for truck in self.trucks:
             # Only add trucks that have travelled a non-zero distance.
-            if len(truck.route) > 1:
-                times_travelled += 1
-
-        return self.total_distance_travelled(dmap) / times_travelled
+            if truck.distance(dmap) != 0:
+                count += 1
+        return total / count
 
 
 if __name__ == '__main__':
