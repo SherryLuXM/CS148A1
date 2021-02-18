@@ -84,12 +84,35 @@ def test_distance_map_basic() -> None:
     assert m.distance('Montreal', 'Toronto') == 4
 
 
+def test_distance_map_multiple() -> None:
+    """Test DistanceMap with multiple distances provided."""
+    m = DistanceMap()
+    assert m.distance('Vancouver', 'Toronto') == -1
+    assert m.distance('Edmonton', 'Toronto') == -1
+    m.add_distance('Montreal', 'Toronto', 4)
+    m.add_distance('Calgary', 'Toronto', 10)
+    m.add_distance('Edmonton', 'Toronto', 11)
+    m.add_distance('Vancouver', 'Toronto', 20)
+
+    assert m.distance('Montreal', 'Toronto') == 4
+    assert m.distance('Calgary', 'Toronto') == 10
+    assert m.distance('Edmonton', 'Toronto') == 11
+    assert m.distance('Vancouver', 'Toronto') == 20
+
+
 def test_num_trucks_doctest() -> None:
     """Test the doctest provided for Fleet.num_trucks"""
     f = Fleet()
+    assert f.num_trucks() == 0
     t1 = Truck(1423, 10, 'Toronto')
+    t2 = Truck(1200, 10, 'Toronto')
+    t3 = Truck(1300, 10, 'Toronto')
+    t4 = Truck(1250, 5, 'Toronto')
     f.add_truck(t1)
-    assert f.num_trucks() == 1
+    f.add_truck(t2)
+    f.add_truck(t3)
+    f.add_truck(t4)
+    assert f.num_trucks() == 4
 
 
 def test_num_nonempty_trucks_doctest() -> None:
@@ -297,6 +320,7 @@ class TestExperiment:
     """
     Tests for SchedulingExperiment.run
     """
+
     @pytest.mark.parametrize('test_id, config, expected_stats', test_arguments)
     def test_experiment(self, test_id: str, config: Dict[str, str],
                         expected_stats: Dict[str, str], stat: str) -> None:
