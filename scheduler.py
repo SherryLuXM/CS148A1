@@ -90,21 +90,19 @@ class GreedyScheduler(Scheduler):
     A scheduler that allocate parcels to trucks based on parcel order and truck
     choice.
 
-    === Public Attributes ===
+    === Private Attributes ===
     - parcel_method: comparison function for ordering parcel for allocation
     - truck_order: the order of trucks to get parcel allocation
     """
-    config: Dict[str, str]
-    par_method: Callable[[Parcel, Parcel], bool]
-    truck_order: str
+    _par_method: Callable[[Parcel, Parcel], bool]
+    _truck_order: str
 
     def __init__(self, config: Dict[str, str]) -> None:
         """initialize GreedyScheduler"""
-        self.config = config
         pf = {'non-decreasing': {'volume': _pvnd, 'destination': _pdnd},
               'non-increasing': {'volume': _pvni, 'destination': _pdni}}
-        self.par_method = pf[config['parcel_order']][config['parcel_priority']]
-        self.truck_order = config['truck_order']
+        self._par_method = pf[config['parcel_order']][config['parcel_priority']]
+        self._truck_order = config['truck_order']
 
     def schedule(self, parcels: List[Parcel], trucks: List[Truck],
                  verbose: bool = False) -> List[Parcel]:
@@ -127,7 +125,7 @@ class GreedyScheduler(Scheduler):
     def _order_parcels(self, parcels: List[Parcel]) -> PriorityQueue:
         """Transform the <parcels> into a Queue based on parcel_order in either
         non-decreasing or non-increasing order."""
-        ordered_parcels = PriorityQueue(self.par_method)
+        ordered_parcels = PriorityQueue(self._par_method)
         for parcel in parcels:
             ordered_parcels.add(parcel)
         return ordered_parcels
@@ -139,7 +137,7 @@ class GreedyScheduler(Scheduler):
         """Order trucks in either non-decreasing or non-increasing
         order."""
         ordered_trucks = PriorityQueue(_truck_most_available_space)
-        if self.truck_order == 'non-decreasing':
+        if self._truck_order == 'non-decreasing':
             ordered_trucks = PriorityQueue(_truck_least_available_space)
         for truck in trucks:
             ordered_trucks.add(truck)
