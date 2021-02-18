@@ -74,6 +74,7 @@ class Truck:
         all trucks are initially empty.
     route: an ordered List of city names that a truck is supposed to
         go through.
+    parcels: the parcels allocated for the truck to deliver    
 
     === Representation Invariants ===
     - 0 <= stored <= volume_capacity
