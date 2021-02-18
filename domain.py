@@ -67,14 +67,12 @@ class Truck:
 
     === Public Attributes ===
     id_: a truck's ID number
-    volume_capacity: the maximum amount of volume a truck can
-        carry.
+    volume_capacity: the maximum amount of volume a truck can carry.
     depot: a Truck's initial position.
-    stored: how much volume is stored onto the Truck,
-        all trucks are initially empty.
-    route: an ordered List of city names that a truck is supposed to
-        go through.
-    parcels: the parcels allocated for the truck to deliver    
+    stored: how much volume is stored onto the Truck; all trucks are initially 
+    empty.
+    route: an ordered List of city names that a truck is supposed to go through.
+    parcels: the parcels allocated for the truck to deliver. 
 
     === Representation Invariants ===
     - 0 <= stored <= volume_capacity
