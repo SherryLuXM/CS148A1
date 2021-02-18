@@ -119,20 +119,18 @@ class SchedulingExperiment:
     def _compute_stats(self) -> None:
         """Compute the statistics for this experiment, and store in
         <self>.stats.
-
-        - fleet: the number of trucks in the fleet
-        - unused_trucks: the number of empty trucks
-        - avg_distance: among the used trucks, the average distance they will 
-        have to travel to follow their scheduled route
-        - avg_fullness: among the used trucks, their average fullness. The 
-        fullness of a truck is the percentage of its volume that is taken by 
-        parcels
-        - unused_space: among the used trucks, their total unused space. The 
-        unused space of a truck is the amount (not percentage) of its volume 
-        that is not taken by parcels
-        - unscheduled: the number of unscheduled parcels (parcels that did not 
-        fit onto any truck)
-
+        - fleet: the number of trucks in the fleet.
+        - unused_trucks: the number of empty trucks.
+        - avg_distance: among the used trucks, the average distance they will
+        have to travel to follow their scheduled route.
+        - avg_fullness: among the used trucks, their average fullness. The
+        fullness of a truck is the percentage of its volume that is taken by
+        parcels.
+        - unused_space: among the used trucks, their total unused space. The
+        unused space of a truck is the amount (not percentage) of its volume
+        that is not taken by parcels.
+        - unscheduled: the number of unscheduled parcels (parcels that did not
+        fit onto any truck).
         Precondition: _run has already been called.
         """
         flt = self.fleet
@@ -147,7 +145,6 @@ class SchedulingExperiment:
 
     def _print_report(self) -> None:
         """Report on the statistics for this experiment.
-
         Precondition: _compute_stats has already been called.
         """
         stat = self._stats
@@ -166,15 +163,9 @@ class SchedulingExperiment:
 
 def read_parcels(parcel_file: str) -> List[Parcel]:
     """Read parcel data from <parcel_file> and return.
-
-    Parcel file format:
-    <parcel_id>, <source>, <destination>, <parcel_volume>
-
-    === Preconditions ===
-    <parcel_file> is the path to a file containing parcel data in
+    Parcel file format: <parcel_id>, <source>, <destination>, <parcel_volume>
+    Precondition: <parcel_file> is the path to a file containing parcel data in
                   the form specified in Assignment 1.
-    Parcel IDs may occur in any order and need not be consecutive, but no parcel
-     ID occurs more than once in the file.
     """
     plist = []
     # read and add the parcels to the list.
@@ -192,12 +183,9 @@ def read_parcels(parcel_file: str) -> List[Parcel]:
 def read_distance_map(distance_map_file: str) -> DistanceMap:
     """Read distance data from <distance_map_file> and return a DistanceMap
     that records it.
-
-    Map file format:
-    <city1>, <city2>, <distance1> [, <distance2> ]
-
+    Map file format: <city1>, <city2>, <distance1> [, <distance2> ]
     === Preconditions ===
-    <distance_map_file> is the path to a file containing distance data in the 
+    <distance_map_file> is the path to a file containing distance data in the
     form specified in Assignment 1.
     """
     dmap = DistanceMap()
@@ -216,14 +204,11 @@ def read_distance_map(distance_map_file: str) -> DistanceMap:
 def read_trucks(truck_file: str, depot_location: str) -> Fleet:
     """Read truck data from <truck_file> and return a Fleet containing these
     trucks, with each truck starting at the <depot_location>.
-
-    Truck file format:
-    <truck_id>, <truck_volume>
-
+    Truck file format: <truck_id>, <truck_volume>
     === Preconditions ===
     <truck_file> is a path to a file containing truck data in the form specified
      in Assignment 1.
-    Truck IDs may occur in any order and need not be consecutive, but no truck 
+    Truck IDs may occur in any order and need not be consecutive, but no truck
     ID occurs more than once in the file.
     """
     flt = Fleet()
@@ -239,12 +224,10 @@ def read_trucks(truck_file: str, depot_location: str) -> Fleet:
 def simple_check(config_file: str) -> None:
     """Configure and run a single experiment on the scheduling problem
     defined in <config_file>.
-
     Precondition: <config_file> is a json file with keys and values
     as in the dictionary format defined in Assignment 1.
     """
     # Read an experiment configuration from a file and build a dictionary
-    # from it.
     with open(config_file, 'r') as file:
         configuration = json.load(file)
     # Create and run an experiment with that configuration.
