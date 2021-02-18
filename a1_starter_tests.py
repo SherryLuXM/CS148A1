@@ -73,6 +73,26 @@ test_arguments = [
     # (<test_id>, <config dictionary>, <expected_stats dictionary>)
     # If you're adding multiple tests: remember to add a comma (,) after the
     # tuple!
+    ('2-destination',
+     {
+         'depot_location': 'Toronto',
+         'parcel_file': 'data/parcel-data-small.txt',
+         'truck_file': 'data/truck-data-small.txt',
+         'map_file': 'data/map-data.txt',
+         'algorithm': 'greedy',
+         'parcel_priority': 'destination',
+         'parcel_order': 'non-increasing',
+         'truck_order': 'non-decreasing',
+         'verbose': 'false'
+     },
+     {
+         'fleet': 3,
+         'unused_trucks': 0,
+         'unused_space': 0,
+         'avg_distance': 192.7,
+         'avg_fullness': 100,
+         'unscheduled': 0
+     }),
 ]
 
 
