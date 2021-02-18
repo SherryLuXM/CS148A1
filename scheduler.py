@@ -91,8 +91,8 @@ class GreedyScheduler(Scheduler):
     choice.
     === Public Attributes ===
     === Private Attributes ===
-    parcel_method: comparison function for ordering parcel for allocation
-    truck_order: the order of trucks to get parcel allocation
+    _par_method: comparison function for ordering parcel for allocation
+    _truck_order: the order of trucks to get parcel allocation
     """
     _par_method: Callable[[Parcel, Parcel], bool]
     _truck_order: str
