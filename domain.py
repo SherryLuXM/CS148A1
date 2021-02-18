@@ -194,9 +194,9 @@ class Truck:
         i = 0
         d_total = 0
         while i < len(self.route) - 1:
-            # look up the distances on our distances dictionary.
-            # assume that <dmap> always has the needed information
-            d_total += dmap.distance(self.route[i], self.route[i + 1])
+            dist = dmap.distance(self.route[i], self.route[i + 1])
+            if dist > 0:
+                d_total += dmap.distance(self.route[i], self.route[i + 1])
             i += 1
         # the truck needs to return to depot at the end of route
         final = dmap.distance(self.route[i], self.depot)
@@ -417,8 +417,9 @@ class Fleet:
         """
         total_d = 0
         for truck in self.trucks:
-            if truck.distance(dmap) > 0:
-                total_d += truck.distance(dmap)
+            dist = truck.distance(dmap)
+            if dist > 0:
+                total_d += dist
         return total_d
 
     def average_distance_travelled(self, dmap: DistanceMap) -> float:
@@ -451,13 +452,12 @@ class Fleet:
         total = self.total_distance_travelled(dmap)
         if total == 0:
             return 0
-        else:
-            count = 0
-            for truck in self.trucks:
-                # Only add trucks that have travelled a non-zero distance.
-                if truck.distance(dmap) > 0:
-                    count += 1
-            return total / count
+        count = 0
+        for truck in self.trucks:
+            # Only add trucks that have travelled a non-zero distance.
+            if truck.distance(dmap) > 0:
+                count += 1
+        return total / count
 
 
 if __name__ == '__main__':
