@@ -89,7 +89,7 @@ class GreedyScheduler(Scheduler):
     """
     A scheduler that allocate parcels to trucks based on parcel order and truck
     choice.
-
+    === Public Attributes ===
     === Private Attributes ===
     parcel_method: comparison function for ordering parcel for allocation
     truck_order: the order of trucks to get parcel allocation
