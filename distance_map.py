@@ -30,11 +30,11 @@ class DistanceMap:
     """Lets client code store and look up the distance betweeen any two cities.
     === Public Attributes ===
     === Private Attributes ===
-    _distances: records of distances from one city to another. 
+    _distances: records of distances from one city to another city in dict form.
     === Representation Invariants ===
-    - The distance between cities must not be negative.
-    - If the distance from city A to city B is recorded, the distance from city
-    B to city A must be available.
+    The distance between cities must not be negative.
+    If the distance from city A to city B is recorded, the distance from city B
+    to city A must be available.
     === Sample Usage ===
     >>> d = DistanceMap()
     >>> d.add_distance('Toronto', 'Montreal', 10)
