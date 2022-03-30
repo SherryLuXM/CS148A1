@@ -1,9 +1,9 @@
 <div id="top"></div>
 
 
-<h3 align="center">Multiple Regression Analysis in R</h3>
+<h3 align="center"> Parcel Delivery Implementation </h3>
   <p align="center">
-  Data Analysis project completed in 2021
+  Computer science project completed in 2021
   </p>
 </div>
 
@@ -19,8 +19,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#system-structure">System structure</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
@@ -30,27 +29,25 @@
 
 ## About The Project
 
-This project showcases a rigorous process to develop a muliple linear regression model for predictive and inferential purpose. 
-It uses a dataset of 1000 properties in California, with 14 variables, including the identifier and response. The goal is to understand the factors that affect a property's
-housing price, and to make good prediction on the housing price given some new data with other information. The analytical process focuses on data description, 
-data visualization, variable selection, model transformation, model diagnostics, model validation, and model interpretation. The concepts used include ANOVA, power 
-transformation, analysis of covariance, AIC(Akaike Information Criteria), ajusted AIC, BIC, QQ plots, stepwise variable selection, VIF(variance inflation factor). The two 
-preconditions and four assumptions for a multiple linear regression model are checked and the model is handled appropriately to deal with any violation. In the analysis of 
-covariance, models with different main effect and interaction terms are investigated and compared. The variables have been checked for multicollinearity, and highly correlated 
-variables and high leverage points are removed after taking the context into consideration.
+This project showcases through knowledge with class design and implementation in Python, capacity to understand and work with complex code, and use of quenes, unit-testing, and Abstract Data Type. 
+
+My team builds a system to schedule and optimize parcel delivery based on constraints like truck availability, parcel sizes, depot location, parcel destinations, to schedule the most efficient routes. A random delivery-scheduling algorithm was first implemented as a baseline, then we develop a greedy optimization algorithm that gives much better results.
+
+Specifically, the project requires understanding of composition and inheritance, and implementation of classes and subclasses with attributes, representation invariants, preconditions, methods, and appropriate interface and data structure. We work with existing data to build the most reasonable and functional sets of classes and methods, which support an algorithm that can produce a definite and optimized solution for the parcel delivery problem.
 
 ### Built With
-R Libraries:
-* car
-* MASS
-* leaps
-* pnag
-* xtable
+Python
 
 ### File Guide
-* Final Project Code: R code containing data analysis and model building
-* housing: dataset that the sample draws from
-* Xiaoman Lu STA302 Final Project Report: written analysis on the project
+* a1_starter_tests.py: contains unit tests;
+* experiment.py: contains class SchedulingExperiment;
+* distance_map.py: contains class DistanceMap that allows clients to look up or store distance between two cities;
+* domain.py: contains classes Parcel, Truck, and Fleet;
+* container.py: contains class Container and a child class PriorityQueue;
+* scheduler.py: contains an abstract class Scheduler and two subclasses RandomScheduler and GreedyScheduler
+* explore.py: compares all algorithms
+* generator.py: creates random truck and parcel data and writes them to file 
+* A1 Handout.pdf: assignment requirements and instructions
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -58,50 +55,39 @@ R Libraries:
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-The procedure used in this project can be referenced for applying multiple linear regression in other datasets. Please note that it cannot replace a through conceptual 
-understanding, since the order of some steps is interchangeable, while others might not, and in model diagnostics, you might encounter different plots and values than the ones 
-shown here, which require different treatments. 
+The code can be referenced for implementing classes, subclasses, and methods in Python, for writing algorithms that generate data or unit tests, or compute optimized solutions, and for doing algorithm comparison. 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [ ] Power Transformation 
-- [ ] Preconditions Check
-- [ ] Assumptions Check
-- [ ] Variable Selection
-- [ ] Analysis of Covariance
-- [ ] High Leverage Points Check
-- [ ] Preconditions Recheck
-- [ ] Assumptions Recheck
-- [ ] Model Validation
-- [ ] Summary Statistics
-    - [ ] Histogram
-    - [ ] Boxplot
-    - [ ] Scatterplot
-    - [ ] Correlation table
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch 
-3. Commit your Changes
-4. Push to the Branch 
-5. Open a Pull Request
+<!-- System structure -->
+## System structure
+Class, subclass, and notable functions
+- SchedulingExperiment
+- DistanceMap
+- Parcel
+- Truck
+    - packable()
+    - pack()
+    - fullness()
+    - distance()
+- Fleet
+    - add_truck()
+    - num_trucks()
+    - num_nonempty_trucks()
+    - parcel_allocations()
+    - total_unused_space()
+    - \_total_fullness()
+    - average_fullness()
+    - total_distance_travelled()
+    - average_distance_travelled()
+- Container
+  - PriorityQueue
+- Scheduler
+  - RandomScheduler
+  - GreedyScheduler
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
 
 ## License
 
@@ -117,7 +103,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 Sherry Xiaoman Lu - sherry.luxiaoman@gmail.com
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
-Project Link: [https://github.com/SherryLuXM/STA302-Final-Project](https://github.com/SherryLuXM/STA302-Final-Project)
+Project Link: [https://github.com/SherryLuXM/CS148A1.git](https://github.com/SherryLuXM/CS148A1.git)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -126,8 +112,7 @@ Project Link: [https://github.com/SherryLuXM/STA302-Final-Project](https://githu
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* This is the final project from STA302/1001 Methods of Data Analysis 1, taught by Katherine Daignault, taken at University of Toronto in the 2020-2021 Winter term. Professor
-Daignault has provided invaluable training and support. 
+* This is the first assignment from CSC148H1 S 20211: Introduction to Computer Science, taken during the Winter 2020-2021 semester, at the St.George Campus, at University of Toronto, taught by Professor Diane Horton. The experiment.py, explore.py, and generator.py are mostly if not all written by the course staffs, while they provided frameworks and guidances for coding the other files. 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
