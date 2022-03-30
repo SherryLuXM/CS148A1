@@ -1,7 +1,7 @@
 <div id="top"></div>
 
 
-<h3 align="center"> Parcel Delivery Implementation </h3>
+<h3 align="center"> Parcel Delivery Scheduling Algorithm in Python</h3>
   <p align="center">
   Computer science project completed in 2021
   </p>
