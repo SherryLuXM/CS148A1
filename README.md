@@ -44,10 +44,11 @@ Python
 * distance_map.py: contains class DistanceMap that allows clients to look up or store distance between two cities;
 * domain.py: contains classes Parcel, Truck, and Fleet;
 * container.py: contains class Container and a child class PriorityQueue;
-* scheduler.py: contains an abstract class Scheduler and two subclasses RandomScheduler and GreedyScheduler
-* explore.py: compares all algorithms
-* generator.py: creates random truck and parcel data and writes them to file 
-* A1 Handout.pdf: assignment requirements and instructions
+* scheduler.py: contains an abstract class Scheduler and two subclasses RandomScheduler and GreedyScheduler;
+* explore.py: compares all algorithms;
+* generator.py: creates random truck and parcel data and writes them to file;
+* A1 Handout.pdf: assignment requirements and instructions;
+* LICENSE: MIT License for the project.
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
